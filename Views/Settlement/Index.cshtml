@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+<!-- Example row of columns -->
+<div class="well well-small">
+
+    Justyna <i class="icon-arrow-left"></i>  Sylwester  2,22 | 
+    Agata <i class="icon-arrow-right"></i>  Sylwester  2,22
+</div>
+
+      <div class="row">
+        <div class="span12">
+			<button type="button" class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i>Add</button><br /><br />
+			
+
+			<div class="accordion" id="accordion2">
+                <div class="accordion-group">
+					<div class="accordion-heading">
+						<a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+						Rozliczenie 25-12-2011
+						</a>
+					</div>
+					<div id="collapseOne" class="accordion-body collapse" style="height: 0px; ">
+                        <div class="accordion-inner">
+                            <div class="span6">
+
+                                <table class="table table-striped" data-bind="visible:items().length>0">
+                                    <thead>
+                                        <tr>
+                                            <th>art.</th>
+                                            <th>Kwota</th>
+                                            <th>Kupił</th>
+                                            <th>X</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-bind="foreach:items">
+                                        <tr>
+                                            <td><input class="required" data-bind='value:name'/></td>
+                                            <td><input class="required number" style="width: 20pt" data-bind='value:amount'/></td>
+                                            <td>SG</td>
+                                            <td><a href="#" data-bind="click:$root.removeItem">Delete</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <button type="button"  data-bind='click: addItem' class="btn btn-mini btn-primary"><i class="icon-ok-circle icon-white"></i> Edytuj</button>
+                                <button data-bind='enable: items().length > 0' type='submit'>Submit</button>
+
+                            </div>
+                            <div class="span4">
+                                Z tego rozliczenia
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <td>Justyna</td>
+                                            <td>jest winna</td>
+                                            <td>Sylwester</td>
+                                            <td>5zł</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Agata</td>
+                                            <td>jest winna</td>
+                                            <td>Justynie</td>
+                                            <td>5zł</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sylwester</td>
+                                            <td>jest winien</td>
+                                            <td>Justynie </td>
+                                            <td>12zł</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                               
+                            </div>
+                                <button type="button" class="btn btn-mini btn-primary disabled"><i class="icon-ok-circle icon-white"></i> Save List</button>
+                            </div>
+					</div>
+                </div>
+                <div class="accordion-group">
+					<div class="accordion-heading">
+						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+						Rozliczenie # 3
+						</a>
+					</div>
+					<div id="collapseTwo" class="accordion-body collapse" style="height: 0px; ">
+						<textarea class="resizable" rows="5" style="width:90%">mleko
+pierogi
+kwasek</textarea><button type="button" class="btn btn-mini btn-primary"><i class="icon-ok-circle icon-white"></i> Save List</button>
+					</div>
+                </div>
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseThree">
+                            Rozliczenie #3 <span class="label label-success"><i class="icon-ok icon-white"></i></span>
+                        </a>
+                    </div>
+                    <div id="collapseThree" class="accordion-body in collapse" style="height: auto; ">
+                        <div class="accordion-inner">
+                            <textarea class="resizable" rows="5" style="width:90%">mleko
+pierogi
+kwasek</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+                </div>
+<hr>
+@section scripts
+{
+<script type="text/javascript">
+    var GiftModel = function (items) {
+        var self = this;
+        self.items = ko.observableArray(items);
+
+        self.addItem = function () {
+            self.items.push({
+                name: "",
+                amount: ""
+            });
+        };
+
+        self.removeItem = function (gift) {
+            self.items.remove(gift);
+        };
+
+        self.save = function (form) {
+            alert("Could now transmit to server: " + ko.utils.stringifyJson(self.items));
+            // To actually transmit to server as a regular form post, write this: ko.utils.postJson($("form")[0], self.items);
+        };
+    };
+
+    var viewModel = new GiftModel([
+        { name: "Tall Hat", amount: "39.95" },
+        { name: "Long Cloak", amount: "120.00" }
+    ]);
+    ko.applyBindings(viewModel);
+</script>
+}

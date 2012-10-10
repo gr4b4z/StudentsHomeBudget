@@ -1,0 +1,59 @@
+﻿@model List<StudentsHomeBudget.Models.ShoppingList>
+@{
+    ViewBag.Title = "Index";
+
+}
+  <div class="row">
+        <div class="span8">
+          <h2>Heading</h2>
+        
+			<button type="button" class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i></button><br /><br />
+			Listy zakupów:
+            <br /><br />
+
+            <div class="accordion" id="accordion2">
+                @{
+                    var first = " in";
+                }
+                @foreach(var lista in @Model)
+                {
+
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapse-@lista.Id">
+                                Lista zakupów @lista.Id
+                                @if(@lista.isDone)
+                                {
+                                    <span class="label label-success"><i class="icon-ok icon-white"></i></span>
+                                }else
+                                {
+                                    <span class="label label-info">ToDo</span> 
+                                }
+                                
+                            </a>
+                        </div>
+                        <div id="collapse-@lista.Id" class="accordion-body collapse @first" style="height: 0px; ">
+                            <div class="accordion-inner">
+                                <textarea class="resizable" rows="5" style="width:90%">@lista.Items.Aggregate((s, s1) => s+"\n"+s1)</textarea>
+                                <button type="button" class="btn btn-mini btn-primary disabled"><i class="icon-ok-circle icon-white"></i> Save List</button>
+
+                            </div>
+                        </div>
+                    </div>
+                    {
+                        first = "";
+                    }
+                }
+            </div>
+            
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+        </div>
+        
+        <div class="span4">
+          <h2>Heading</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+        </div>
+        </div>
+
+      <hr>
