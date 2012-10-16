@@ -2,86 +2,82 @@
     ViewBag.Title = "Index";
 }
 <!-- Example row of columns -->
-<div class="well well-small">
-
-    Justyna <i class="icon-arrow-left"></i>  Sylwester  2,22 | 
-    Agata <i class="icon-arrow-right"></i>  Sylwester  2,22
+<div class="well well-small" data-bind="foreach:GlobalPrice">
+      <span data-bind="text:usrId"></span>
+     <span><i class="icon-arrow-right"></i></span>
+     <span data-bind="text:usr2Id"></span>
+     <span data-bind="text:amount"></span>
+    |
 </div>
 
       <div class="row">
-        <div class="span12">
-			<button type="button" class="btn btn-small btn-primary" data-bind="click:addSettlement"><i class="icon-plus icon-white"></i>Add</button><br /><br />
+          <div class="span12">
+              
+                  <button type="button" class="btn btn-small btn-primary" data-bind="click:addSettlement">
+                      <i class="icon-plus icon-white"></i>Add
+                  </button>
+                   
+              Na podstawie listy: <select id="listaZakopow" data-bind="options:shoppingLists, optionsText:'name', optionsValue:'id', value:selectedList,optionsCaption:'Pusta lista'" ></select>
+                       <br />
 			
 
-			<div class="accordion" id="accordion2" data-bind="foreach:settlements">
-                <div class="accordion-group">
-                    <div class="accordion-heading">
-                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne" data-bind="attr:{href:'#collapseOne'+idn}">
-                            Rozliczenie 25-12-2011
-                        </a>
-                    </div>
-                    <div data-bind="attr:{id:'#collapseOne'+idn}"  class="accordion-body collapse" style="height: 0px; ">
-                        <div class="accordion-inner">
-                            <div class="span6">
+              <div class="accordion" id="accordion2" data-bind="foreach:settlements">
+                  <div class="accordion-group">
+                      <div class="accordion-heading">
+                          <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" data-bind="attr:{href:'#collapseOne'+idn}">
+                              Rozliczenie 25-12-2011 (<span data-bind="text:totalSum"></span> zł)
+                          </a>
+                      </div>
+                      <div data-bind="attr:{id:'collapseOne'+idn}"  class="accordion-body collapse" style="height: 0px; ">
+                          <div class="accordion-inner">
+                              <div class="span6">
 
-                                <table class="table table-striped" data-bind="visible:items().length>0">
-                                    <thead>
-                                        <tr>
-                                            <th>art.</th>
-                                            <th>Kwota</th>
-                                            <th>Kupił</th>
-                                            <th>X</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody data-bind="foreach:items">
-                                        <tr>
-                                            <td><input class="required" data-bind='value:name'/></td>
-                                            <td><input class="required number" style="width: 40pt" data-bind='value:amount'/></td>
-                                            <td><select data-bind="options:parent.users, optionsText:'nick', optionsValue:'id', value:userId"  style="width: 50pt"></select></td>
-                                            <td><a href="#" data-bind="click:$parent.removeItem">Delete</a></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <span>Suma:</span><span data-bind="text:totalSum"></span>
-                                <button type="button"  data-bind='click: addItem' class="btn btn-mini btn-primary">
-                                    <i class="icon-ok-circle icon-white"></i> Add
-                                </button>
-                                <button data-bind='enable: items().length > 0' type='submit'>Submit</button>
+                                  <table class="table table-striped" data-bind="visible:items().length>0">
+                                      <thead>
+                                          <tr>
+                                              <th>art.</th>
+                                              <th>Kwota</th>
+                                              <th>Kupił</th>
+                                              <th>X</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody data-bind="foreach:items">
+                                          <tr>
+                                              <td><input class="required" data-bind='value:name'/></td>
+                                              <td><input class="required number" style="width: 40pt" data-bind='value:amount'/></td>
+                                              <td><select data-bind="options:$root.settlementCore.users, optionsText:'nick', optionsValue:'id', value:userId"  style="width: 50pt"></select></td>
+                                              <td><a href="#" data-bind="click:$parent.removeItem">Delete</a></td>
+                                          </tr>
+                                      </tbody>
+                                  </table>
 
-                            </div>
-                            <div class="span4">
-                                Z tego rozliczenia
-                                <table class="table table-striped">
-                                    <tbody>
-                                        <tr>
-                                            <td>Justyna</td>
-                                            <td>jest winna</td>
-                                            <td>Sylwester</td>
-                                            <td>5zł</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Agata</td>
-                                            <td>jest winna</td>
-                                            <td>Justynie</td>
-                                            <td>5zł</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Sylwester</td>
-                                            <td>jest winien</td>
-                                            <td>Justynie </td>
-                                            <td>12zł</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                
+                                  <button type="button"  data-bind='click: addItem' class="btn btn-mini btn-primary">
+                                      <i class="icon-ok-circle icon-white"></i> Add
+                                  </button>
+                                  <button type="button"  data-bind='click: recalculate,enable: items().length > 0' class="btn btn-mini btn-primary">
+                                      <i class="icon-ok-circle icon-white"></i> Recalculate ad Save
+                                  </button>
+
+                              </div>
+                              <div class="span4">
+                                  Z tego rozliczenia
+                                  <table class="table table-striped">
+                                      <tbody data-bind="foreach: PriceTable">
+                                          <tr>
+                                              <td data-bind="text:usrId"></td>
+                                              <td>jest winn(y)a</td>
+                                              <td data-bind="text:usr2Id"></td>
+                                              <td data-bind="text:amount"></td>
+                                          </tr>
+                                      </tbody>
+                                  </table>
                                
-                            </div>
-                            <button type="button" class="btn btn-mini btn-primary disabled">
-                                <i class="icon-ok-circle icon-white"></i> Save List
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                @*
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  @*
                 <div class="accordion-group">
 					<div class="accordion-heading">
 						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
@@ -108,13 +104,23 @@ kwasek</textarea>
                         </div>
                     </div>
                 </div>*@
-            </div>
-            </div>
+              </div>
+          </div>
                 </div>
 <hr>
 @section scripts
 {
     <script type="text/javascript">
+
+        var WhoWhomItem = function (usrId,usr2Id, amount) {
+            return {
+                usrId: usrId,
+                usr2Id:usr2Id,
+                amount: ko.observable(amount)
+            };
+
+        };
+
 
         var SettlementItem = function (name, amount, user) {
             return {
@@ -139,6 +145,7 @@ kwasek</textarea>
                 var arr = new Array();
                 ko.utils.arrayForEach(items, function (item) {
                     var am = parseFloat(item.amount());
+                    if (isNaN(am)) am = 0;
                     if (!(arr[item.userId] === undefined)) {
                         arr[item.userId] += am;
                     } else {
@@ -154,12 +161,12 @@ kwasek</textarea>
                 var count = idx.length;
                 for (var i = 0; i < count; i++) {
                     for (var j = 0; j < i; j++) {
-                        if (matrix[idx[i]][idx[j]] > matrix[idx[j]][idx[i]]) {
-                            matrix[idx[i]][idx[j]] -= matrix[idx[j]][idx[i]];
-                            matrix[idx[j]][idx[i]] = 0;
+                        if (matrix[idx[j]][idx[i]] > matrix[idx[i]][idx[j]]) {
+                            matrix[idx[j]][idx[i]] -= matrix[idx[i]][idx[j]];
+                            matrix[idx[i]][idx[j]] = 0;
                         }
-
                     }
+                    if (i == j) matrix[idx[j]][idx[i]] = 0;
                 }
 
                 return matrix;
@@ -176,33 +183,55 @@ kwasek</textarea>
 
             return ownedMoney;
         };
-        var SettlementModel = function (id,items) {
+        var SettlementCore = function() {
+            var self = this;
+            self.users = [{ id: 10, nick: 'SG', fullName: "Sylwester" }, { id: 13, nick: 'AG', fullName: "Agnieszka" }, { id: 892, nick: 'BG', fullName: "Bożena" }];
+            self.usersById = {
+                10: self.users[0],
+                13: self.users[1],
+                892: self.users[2]
+            };
+            self.currentUser = self.users[0];
+            self.fillPriceTable = function (priceTable, matrix) {
+                if (typeof priceTable.removeAll == 'function') priceTable.removeAll();
+               
+                for (var a in matrix) {
+                    for (var b in matrix[a]) {
+                        if (matrix[a][b] != 0)
+                            priceTable.push(new WhoWhomItem(self.usersById[b].fullName, self.usersById[a].fullName, matrix[a][b].toFixed(2)));
+                    }
+                }
+            };
+            self.recalculateMatrix = function (items) {
+                var ownedMoney = generateArray(self.users);
+                return calculatedShopping(ownedMoney, self.users, items());
+            };
+        };
+        var SettlementModel = function (id, items, _core) {
             var self = this;
             self.idn = id;
             self.items = ko.observableArray(items);
-            self.users = ko.observableArray([{ id: 10, nick: 'SG',fullName:"Justyna" }, { id: 13, nick: 'AG',fullName:"Sylwester" }, { id: 892, nick: 'BG' ,fullName:"Agnieszka"}]);
-
-            
-            var ownedMoney = generateArray(self.users());
-            
-            
             self.totalSum = ko.computed(function () {
                 var total = 0;
                 ko.utils.arrayForEach(self.items(), function(item) {
                     total += parseFloat(item.amount());
                 });
-                
-                ownedMoney = calculatedShopping(ownedMoney, self.users(), self.items());
-
-
-                return total;
+             return total;
             });
-            
-
+            self.PriceTable = ko.observableArray([]);
             self.addItem = function () {
                 self.items.push(new SettlementItem("", "", 0));
             };
+            self.matrix = new Array();
+            self._dummyObservable = ko.observable();
+            self.recalculate = function () {
+                self.matrix = _core.recalculateMatrix(self.items);
+                _core.fillPriceTable(self.PriceTable, self.matrix);
+                self._dummyObservable.notifySubscribers();
+            };
 
+            
+            
             self.removeItem = function (settlement) {
                 self.items.remove(settlement);
             };
@@ -214,16 +243,37 @@ kwasek</textarea>
         };
         var SettlementFullModel = function() {
             var self = this;
+            self.settlementCore = new SettlementCore();
+            self.currentUser = self.settlementCore.currentUser;
             self.settlements =ko.observableArray([new SettlementModel(0,[
                 new SettlementItem("Tall Hat", 395, 10),
                 new SettlementItem("Tall Hat", 39, 13),
-                new SettlementItem("Tall Hat", 3, 13)])]);
+                new SettlementItem("Tall Hat", 3, 13)], self.settlementCore)]);
             self.addSettlement = function () {
-                self.settlements.push(new SettlementModel(self.settlements().length+1,[
-                new SettlementItem("Tall Hat", 395, 10),
-                new SettlementItem("Tall Hat", 39, 13),
-                new SettlementItem("Tall Hat", 3, 13)]));
+                self.settlements.push(new SettlementModel(self.settlements().length+1,[new SettlementItem("", 0, self.currentUser.Id)], self.settlementCore));
             };
+     
+            self.GlobalPrice = ko.computed(function () {
+                var globalPrice = new Array();
+                var bigArray = new Array();
+                ko.utils.arrayForEach(self.settlements(), function (item) {
+                    item._dummyObservable();
+                    if (bigArray.length == 0)
+                        bigArray = (item.matrix);
+                    else {
+                        for (var m in item.matrix) {
+                            for (var n in item.matrix[m]) {
+                                bigArray[m][n] += item.matrix[m][n];
+                            }
+                        }
+                    }
+                });
+              self.settlementCore.fillPriceTable(globalPrice, bigArray);
+              return globalPrice;
+            });
+
+            self.shoppingLists = [{ id: 123, name: "Lista zakupów123" }, { id: 3423, name: "Lista zakupów45345" }];
+            self.selectedList = ko.observable();
         };
 
         var viewModel = new SettlementFullModel();
