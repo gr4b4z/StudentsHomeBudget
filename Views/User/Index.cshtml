@@ -8,7 +8,7 @@
         <div class="span8">
           <h2>Users list</h2>
         
-		<button type="button" class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i></button>
+		<button type="button" class="btn btn-small btn-primary" data-bind="click:add"><i class="icon-plus icon-white"></i></button>
 			<table class="table table-striped">
 				<thead>
 					<tr>
@@ -19,17 +19,24 @@
 						<th></th>
 					</tr>
 				</thead>
-                <tbody>
-                    @foreach(var user in Model)
-                    {
-                    <tr>
-                    <td>@user.Id</td>
-                    <td>@user.Name</td>
-                    <td>@user.SurName</td>
-                    <td>@user.Email</td>
-                    <td><button type="button" class="btn btn-small btn-info"><i class="icon-edit icon-white"></i></button><button type="button" class="btn btn-small  btn-danger"><i class="icon-remove icon-white"></i></button></td>
-                    </tr>    
-                    }
+                <tbody data-bind="foreach:people">
+                        <tr>
+                            <td><span data-bind="text:id"></span></td>
+                            <td><span data-bind="text:firstName, visible:!editing()" ></span>
+                                <input data-bind="value:firstName, visible:editing" />
+                            </td>
+                            <td><span data-bind="text:lastName, visible:!editing()" ></span>
+                                <input data-bind="value:lastName, visible:editing" />
+                            </td>
+                            <td><span data-bind="text:email"></span></td>
+                            <td><button type="button" class="btn btn-small btn-info" data-bind="click:editSaveRow,text:mode">
+                                    <i class="icon-edit icon-white"></i>Zapisz
+                                </button>
+                                <button type="button" class="btn btn-small  btn-danger" data-bind="click:$root.remove">
+                                    <i class="icon-remove icon-white"></i>
+                                </button>
+                            </td>
+                        </tr>    
                 </tbody>
             </table>
 		
@@ -45,3 +52,54 @@
       </div>
 
       <hr>
+@section scripts
+{
+    <script type="text/javascript">
+        ko.bindingHandlers.hidden = {
+            update: function (element, valueAccessor) {
+                var value = ko.utils.unwrapObservable(valueAccessor());
+                ko.bindingHandlers.visible.update(element, function () { return !value; });
+            }
+        };
+
+        var Person = function (id,name, surname, email) {
+            var self = this;
+            self.id = id;
+            self.firstName =  ko.observable(name);
+            self.lastName = ko.observable(surname);
+            self.email = ko.observable(email);
+            self.editing = ko.observable(false);
+            self.mode =  ko.observable("Edytuj");
+            self.editSaveRow = function () {
+                self.mode((self.editing()) ? "Edytuj" : "Zapisz");
+                self.editing(!self.editing());
+            };
+        };
+        var PersonViewModel = function (people) {
+            var self = this;
+            self.people = ko.observableArray(people);
+            self.add = function () {
+                self.people.push(new Person(people.length + 1, "", "", ""));
+            };
+            self.remove = function(item) {
+                self.people.remove(item);
+            };
+            self.save = function (form) {
+                alert("Could now transmit to server: " + ko.toJSON(self.shoppingLists));
+                // To actually transmit to server as a regular form post, write this: ko.utils.postJson($("form")[0], self.gifts);
+            };
+
+        };
+
+
+        var viewModel = new PersonViewModel([
+            new Person("1", "Sylwester", "Grabowski", "w@wp.pl"),
+            new Person("1", "Agata", "Szyńkarczuk", "w@wp.pl"),
+            new Person("1", "Antoni", "Grabowski", "w@wp.pl"),
+            new Person("1", "Agnieszka", "Grabowski", "w@wp.pl"),
+        ]);
+        
+
+        ko.applyBindings(viewModel);
+    </script>
+}

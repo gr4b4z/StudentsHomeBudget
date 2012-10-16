@@ -4,50 +4,47 @@
 
 }
   <div class="row">
-        <div class="span8">
-          <h2>Heading</h2>
-        
-			<button type="button" class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i></button><br /><br />
-			Listy zakupów:
-            <br /><br />
+      <div class="span8">
+          <h3>Listy zakupów</h3>
+          <button type="button" data-bind="click:addList" class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i>New</button><br /><br />
 
-            <div class="accordion" id="accordion2">
-                @{
-                    var first = " in";
-                }
-                @foreach(var lista in @Model)
-                {
 
-                    <div class="accordion-group">
-                        <div class="accordion-heading">
-                            <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapse-@lista.Id">
-                                Lista zakupów @lista.Id
-                                @if(@lista.isDone)
-                                {
-                                    <span class="label label-success"><i class="icon-ok icon-white"></i></span>
-                                }else
-                                {
-                                    <span class="label label-info">ToDo</span> 
-                                }
-                                
-                            </a>
-                        </div>
-                        <div id="collapse-@lista.Id" class="accordion-body collapse @first" style="height: 0px; ">
-                            <div class="accordion-inner">
-                                <textarea class="resizable" rows="5" style="width:90%">@lista.Items.Aggregate((s, s1) => s+"\n"+s1)</textarea>
-                                <button type="button" class="btn btn-mini btn-primary disabled"><i class="icon-ok-circle icon-white"></i> Save List</button>
+          <div class="accordion" id="accordion2" data-bind="foreach: shoppingLists">
 
-                            </div>
-                        </div>
-                    </div>
-                    {
-                        first = "";
-                    }
-                }
-            </div>
+              <div class="accordion-group">
+                  <div class="accordion-heading">
+                      <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" data-bind="attr:{href:'#collapse-'+name}">
+                          Lista zakupów <span data-bind='text:name'> </span>
+                          <span data-bind='text:date'> </span>
+                          
+                          <span class="label label-info"  data-bind="hidden: isDone">ToDo</span>
+                          <span class="label"  data-bind="hidden: notChanged">[List is not saved]</span> 
+                          <span class="label label-success" style="text-align: right" data-bind="visible: isDone">
+                              <i class="icon-ok icon-white"></i>
+                          </span>
+                      </a>
+                            
+
+                  </div>
+                  <div data-bind="attr:{id:'collapse-'+name}" class="accordion-body collapse" style="height: 0px; ">
+                      <div class="accordion-inner">
+                          <textarea class="resizable" rows="5" style="width:90%" data-bind="value:items"></textarea>
+                          <button type="button" class="btn btn-mini btn-primary" data-bind="click:save">
+                              <i class="icon-ok-circle icon-white"></i> Save List
+                          </button>
+                               
+                          <button type="button" class="btn btn-mini btn-primary" data-bind="click:changeStatus">
+                              <i class="icon-ok-circle icon-white"></i> Change status
+                          </button>
+                               
+
+                      </div>
+                  </div>
+              </div>
+          </div>
             
           <p><a class="btn" href="#">View details &raquo;</a></p>
-        </div>
+      </div>
         
         <div class="span4">
           <h2>Heading</h2>
@@ -57,3 +54,85 @@
         </div>
 
       <hr>
+@section scripts
+{
+    <script type="text/javascript">
+        
+        function formatDate(d) {
+            var curr_date = d.getDate();
+            var curr_month = d.getMonth();
+            var curr_year = d.getFullYear();
+            return (curr_date + "-" + curr_month + "-" + curr_year);
+        }
+        ko.bindingHandlers.hidden = {
+            update: function (element, valueAccessor) {
+                var value = ko.utils.unwrapObservable(valueAccessor());
+                ko.bindingHandlers.visible.update(element, function () { return !value; });
+            }
+        };
+        ko.extenders.trackChange = function (target, track) {
+            if (track) {
+                target.isDirty = ko.observable(false);
+                target.originalValue = target();
+                target.subscribe(function (newValue) {
+                    // use != not !== so numbers will equate naturally
+                    target.isDirty(newValue != target.originalValue);
+                });
+            }
+            return target;
+        };
+
+        var ShoppingListItem = function (name, items, isDone, date) {
+            var self = this;
+            var _dummyObservable = ko.observable();
+            self.name = name;
+            self.date = formatDate(date);
+            self.oDone = isDone;
+            self.oitems = items;
+            self.isDone = ko.observable(isDone);
+            self.items = ko.observable(items);
+            self.notChanged = ko.computed(function () {
+                _dummyObservable();
+                return self.isDone() == self.oDone && self.items() == self.oitems;
+            });
+            
+            self.changeStatus = function () {
+                self.isDone(!self.isDone());
+            };
+            self.save = function (form) {
+                self.oDone = self.isDone();
+                self.oitems = self.items();
+                _dummyObservable.notifySubscribers();
+                
+                alert("Could now transmit to server: " + ko.toJSON(self));
+                // To actually transmit to server as a regular form post, write this: ko.utils.postJson($("form")[0], self.gifts);
+            };
+
+        };
+        var ShoppingListModel = function (shoppingLists) {
+            var self = this;
+            self.shoppingLists = ko.observableArray(shoppingLists);
+            self.addList = function() {
+                self.shoppingLists.unshift(new ShoppingListItem(shoppingLists.length+1, "",false,new Date()));
+            };
+            self.removeItem = function(item) {
+                self.shoppingLists.remove(item);
+            };
+            self.save = function (form) {
+                alert("Could now transmit to server: " + ko.toJSON(self.shoppingLists));
+                // To actually transmit to server as a regular form post, write this: ko.utils.postJson($("form")[0], self.gifts);
+            };
+
+        };
+
+        
+        var viewModel = new ShoppingListModel([
+            new ShoppingListItem("1", "item1&#10;item2", true,new Date()),
+            new ShoppingListItem("2", "item1\n item2", false, new Date()),
+            new ShoppingListItem("3", "item1\n item2", false, new Date())
+        ]);
+        
+
+        ko.applyBindings(viewModel);
+    </script>
+}

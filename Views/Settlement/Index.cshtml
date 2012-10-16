@@ -10,17 +10,17 @@
 
       <div class="row">
         <div class="span12">
-			<button type="button" class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i>Add</button><br /><br />
+			<button type="button" class="btn btn-small btn-primary" data-bind="click:addSettlement"><i class="icon-plus icon-white"></i>Add</button><br /><br />
 			
 
-			<div class="accordion" id="accordion2">
+			<div class="accordion" id="accordion2" data-bind="foreach:settlements">
                 <div class="accordion-group">
-					<div class="accordion-heading">
-						<a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
-						Rozliczenie 25-12-2011
-						</a>
-					</div>
-					<div id="collapseOne" class="accordion-body collapse" style="height: 0px; ">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne" data-bind="attr:{href:'#collapseOne'+idn}">
+                            Rozliczenie 25-12-2011
+                        </a>
+                    </div>
+                    <div data-bind="attr:{id:'#collapseOne'+idn}"  class="accordion-body collapse" style="height: 0px; ">
                         <div class="accordion-inner">
                             <div class="span6">
 
@@ -36,13 +36,16 @@
                                     <tbody data-bind="foreach:items">
                                         <tr>
                                             <td><input class="required" data-bind='value:name'/></td>
-                                            <td><input class="required number" style="width: 20pt" data-bind='value:amount'/></td>
-                                            <td>SG</td>
-                                            <td><a href="#" data-bind="click:$root.removeItem">Delete</a></td>
+                                            <td><input class="required number" style="width: 40pt" data-bind='value:amount'/></td>
+                                            <td><select data-bind="options:parent.users, optionsText:'nick', optionsValue:'id', value:userId"  style="width: 50pt"></select></td>
+                                            <td><a href="#" data-bind="click:$parent.removeItem">Delete</a></td>
                                         </tr>
                                     </tbody>
                                 </table>
-                                <button type="button"  data-bind='click: addItem' class="btn btn-mini btn-primary"><i class="icon-ok-circle icon-white"></i> Edytuj</button>
+                                <span>Suma:</span><span data-bind="text:totalSum"></span>
+                                <button type="button"  data-bind='click: addItem' class="btn btn-mini btn-primary">
+                                    <i class="icon-ok-circle icon-white"></i> Add
+                                </button>
                                 <button data-bind='enable: items().length > 0' type='submit'>Submit</button>
 
                             </div>
@@ -72,10 +75,13 @@
                                 </table>
                                
                             </div>
-                                <button type="button" class="btn btn-mini btn-primary disabled"><i class="icon-ok-circle icon-white"></i> Save List</button>
-                            </div>
-					</div>
+                            <button type="button" class="btn btn-mini btn-primary disabled">
+                                <i class="icon-ok-circle icon-white"></i> Save List
+                            </button>
+                        </div>
+                    </div>
                 </div>
+                @*
                 <div class="accordion-group">
 					<div class="accordion-heading">
 						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
@@ -101,39 +107,126 @@ pierogi
 kwasek</textarea>
                         </div>
                     </div>
-                </div>
+                </div>*@
             </div>
             </div>
                 </div>
 <hr>
 @section scripts
 {
-<script type="text/javascript">
-    var GiftModel = function (items) {
-        var self = this;
-        self.items = ko.observableArray(items);
+    <script type="text/javascript">
 
-        self.addItem = function () {
-            self.items.push({
-                name: "",
-                amount: ""
+        var SettlementItem = function (name, amount, user) {
+            return {
+                name: name,
+                amount: ko.observable(amount),
+                userId: user
+            };
+
+        };
+
+        var generateArray = function(l) {
+            var myarray = new Array(l.length);
+            for(var e in l) {
+                myarray[l[e].id] = new Array(l.length);
+                for (var r in l)
+                    myarray[l[e].id][l[r].id] = 0;
+            }
+            return myarray;
+        };
+        var calculatedShopping = function(ownedMoney, users, items) {
+            var usersMadeShoppingAndAmount = function() {
+                var arr = new Array();
+                ko.utils.arrayForEach(items, function (item) {
+                    var am = parseFloat(item.amount());
+                    if (!(arr[item.userId] === undefined)) {
+                        arr[item.userId] += am;
+                    } else {
+                        arr[item.userId] = am;
+                    }
+                });
+                return arr;
+            };
+            var minimalizeMatrix = function (matrix) {
+                var idx = new Array();
+                for (var el in matrix)
+                    idx.push(el);
+                var count = idx.length;
+                for (var i = 0; i < count; i++) {
+                    for (var j = 0; j < i; j++) {
+                        if (matrix[idx[i]][idx[j]] > matrix[idx[j]][idx[i]]) {
+                            matrix[idx[i]][idx[j]] -= matrix[idx[j]][idx[i]];
+                            matrix[idx[j]][idx[i]] = 0;
+                        }
+
+                    }
+                }
+
+                return matrix;
+
+            };
+            var _u = usersMadeShoppingAndAmount();
+            for (var u in _u) {
+                var avg = _u[u] / users.length;
+                for (var z in users)
+                    ownedMoney[u][users[z].id] += avg;
+            }
+            minimalizeMatrix(ownedMoney);
+            
+
+            return ownedMoney;
+        };
+        var SettlementModel = function (id,items) {
+            var self = this;
+            self.idn = id;
+            self.items = ko.observableArray(items);
+            self.users = ko.observableArray([{ id: 10, nick: 'SG',fullName:"Justyna" }, { id: 13, nick: 'AG',fullName:"Sylwester" }, { id: 892, nick: 'BG' ,fullName:"Agnieszka"}]);
+
+            
+            var ownedMoney = generateArray(self.users());
+            
+            
+            self.totalSum = ko.computed(function () {
+                var total = 0;
+                ko.utils.arrayForEach(self.items(), function(item) {
+                    total += parseFloat(item.amount());
+                });
+                
+                ownedMoney = calculatedShopping(ownedMoney, self.users(), self.items());
+
+
+                return total;
             });
+            
+
+            self.addItem = function () {
+                self.items.push(new SettlementItem("", "", 0));
+            };
+
+            self.removeItem = function (settlement) {
+                self.items.remove(settlement);
+            };
+
+            self.save = function (form) {
+                alert("Could now transmit to server: " + ko.utils.stringifyJson(self.items));
+                // To actually transmit to server as a regular form post, write this: ko.utils.postJson($("form")[0], self.items);
+            };
+        };
+        var SettlementFullModel = function() {
+            var self = this;
+            self.settlements =ko.observableArray([new SettlementModel(0,[
+                new SettlementItem("Tall Hat", 395, 10),
+                new SettlementItem("Tall Hat", 39, 13),
+                new SettlementItem("Tall Hat", 3, 13)])]);
+            self.addSettlement = function () {
+                self.settlements.push(new SettlementModel(self.settlements().length+1,[
+                new SettlementItem("Tall Hat", 395, 10),
+                new SettlementItem("Tall Hat", 39, 13),
+                new SettlementItem("Tall Hat", 3, 13)]));
+            };
         };
 
-        self.removeItem = function (gift) {
-            self.items.remove(gift);
-        };
-
-        self.save = function (form) {
-            alert("Could now transmit to server: " + ko.utils.stringifyJson(self.items));
-            // To actually transmit to server as a regular form post, write this: ko.utils.postJson($("form")[0], self.items);
-        };
-    };
-
-    var viewModel = new GiftModel([
-        { name: "Tall Hat", amount: "39.95" },
-        { name: "Long Cloak", amount: "120.00" }
-    ]);
-    ko.applyBindings(viewModel);
-</script>
+        var viewModel = new SettlementFullModel();
+        ko.applyBindings(viewModel);
+    </script>
 }
